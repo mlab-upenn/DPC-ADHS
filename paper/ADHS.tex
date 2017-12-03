@@ -26,6 +26,9 @@
 \usepackage{accents}
 \usepackage{booktabs}
 
+% balance last page
+\usepackage{flushend}
+
 %\usepackage[font=small,justification=raggedright]{caption}
 \newcommand\munderbar[1]{%
 	\underaccent{\bar}{#1}}
@@ -160,7 +163,7 @@ Once these models are created, at each instant $k$ we can find coefficients $\be
 where slack variables $\varepsilon_j$ ensure recursive feasibility of the algorithm. This problem is solved as in classical MPC. At each time step the optimal $u^*_k,\ldots,u^*_{k+N}$ are computed and only the first one is applied as control input, i.e. $u(k) = u^*_k$.
 \begin{figure}[t!]
 	\begin{center}
-		\includegraphics[width=15pc]{figures/dpc-sepvars.eps}
+		\includegraphics[width=21pc]{figures/dpc-sepvars.eps}
 		\caption{Separation of variables. \textit{Step 1:} Tree $\mathcal{T}_1$ is trained only on the disturbances $X_d$ as the features. Tree $\mathcal{T}_2$ uses both the disturbances $X_d$ and the control variables $X_c$ for splitting and is thus not computationally suitable for control. \textit{Step 2:} In the leaf $\ell_{i_j}$ of trees $\mathcal{T}_j$, a linear regression model parametrized by $\beta_{i_j}$ is defined as a function only of the control variables.}\label{figSeparationVariables}
 	\end{center}
 \end{figure}
@@ -793,9 +796,13 @@ It is interesting to notice that in this case the input applied with the MPC-S i
 %==============================================================================================================
 
 \section{CONCLUSIONS AND FUTURE WORK}\label{secConclusion}
-In this paper we provide a methodology to construct a data-driven state-space switched affine model of a system from historical data, using regression trees. We setup an MPC problem and compare the performance of our control strategy against DPC, a predictive control methodology based on regression trees that uses static models to predict system's behavior. The comparison is done on DPC native case study, i.e. temperature control in a room and energy minimization. Results show that our strategy outperforms DPC in terms of optimal cost minimization.
+In this paper, we provide a methodology to construct a data-driven state-space switched affine model of a system using regression trees built from historical data.
+We setup an MPC problem and compare the performance of our control strategy against another MPC controller designed using the actual physics-based model.
+We compare the results of two approaches in the problem of building energy management.
+We show that our strategy is comparable in terms of optimal cost minimization to MPC which requires a physics-based model, thus bypassing the need for expensive physical modeling in the complex systems like buildings. 
+This new approach for data-driven state-space switched affine model is also better than our previous work on control with regression trees that uses static models, see \cite{JainACC2017}.
 
-In future work we want to extend this approach considering random forest algorithm and apply it to a problem where stability is an issue, i.e. frequency control in a microgrid. Another direction is to use this approach to improve an existing modeling by correcting the error approximation using data.
+Future work is focused on extending this approach to random forests and apply it to a problem where stability is important, i.e. frequency control in a microgrid. Another direction is to use this approach to improve an existing modeling by correcting the error approximation using data.
 
 \bibliographystyle{ifacconf}
 \bibliography{BAS}
