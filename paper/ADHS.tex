@@ -104,7 +104,7 @@ The paper is organized as follows. In Section \ref{secDPC} we briefly recall the
 \section{Data Predictive Control}\label{secDPC}
 In this section we briefly recall the concept of DPC introduced in \cite{JainACC2017}. This will be useful to both better understand and compare the approach we want to propose. The idea behind DPC is to create a model of a system using machine learning algorithm (in our case regression trees) starting from his historical data and that can be used in a receding horizon control scheme. Typically, models created using machine learning algorithms are not directly suitable for control, and hence need to be modified. To this aim DPC consider \emph{separation of variables}.
 
-\textbf{Separation of variables.} Let a dataset $(\mathcal{X},\mathcal{Y})$ with $s$ samples for each feature (variable) be given. For $k=1,2,\ldots,s$, $\mathcal{X}$ is the set of control inputs $u\in\mathbb{R}^m$, disturbances $d\in\mathbb{R}^r$ and state variable $x\in\mathbb{R}^n$, and $\mathcal{Y}\in\mathbb{R}^n$ is the set of response variables $y$, that in our case will represent the state evolution over the horizon, i.e. $x(k+1),\ldots,x(k+N)$ given the current time $k$. We partition the set $\mathcal{X}=\{\mathcal{X}_c,\mathcal{X}_d\}$ into the set $\mathcal{X}_c$ of data associated to the $m$ control variables (or manipulated features) and the set $\mathcal{X}_d$ of data associated to the $r+n$ disturbance and state variables (or non-manipulated features). Using separation of variables, the training process to grow a tree $\mathcal{T}$ is divided into two steps:
+\textbf{Separation of variables.} Let a dataset $(\mathcal{X},\mathcal{Y})$ with $s$ samples for each feature (variable) be given. For $k=1,2,\ldots,s$, $\mathcal{X}$ is the set of control inputs $u\in\mathbb{R}^m$, disturbances $d\in\mathbb{R}^r$ and state variable $x\in\mathbb{R}^n$, and $\mathcal{Y}\in\mathbb{R}^n$ is the set of response variables $y$, that in our case will represent the state evolution over the horizon, i.e. $x(k+1),\ldots,x(k+N+1)$ given the current time $k$. We partition the set $\mathcal{X}=\{\mathcal{X}_c,\mathcal{X}_d\}$ into the set $\mathcal{X}_c$ of data associated to the $m$ control variables (or manipulated features) and the set $\mathcal{X}_d$ of data associated to the $r+n$ disturbance and state variables (or non-manipulated features). Using separation of variables, the training process to grow a tree $\mathcal{T}$ is divided into two steps:
 \begin{enumerate}
 \item the trees are trained only on $\mathcal{X}_d$. It is important to note that besides external disturbances, $\mathcal{X}_d$ can also contain past terms of the output $\mathcal{Y}$, as for example the initial state of the system;
 \item affine function models are fit in the leaves (or terminal nodes) of the trees as function of only $u$. 
@@ -127,7 +127,7 @@ Without any loss of generality we consider $n=1$, but the results can be extende
 
 \small
 \begin{equation}\label{eqAffineModel}
-	y(k+j) = \beta_{i_j}[1\ u(k) \cdots u(k+j-1)]^\top,\ \forall i_j\in T_j,\,\forall j,
+	y(k+j) = \beta_{i_j}[1\ u(k) \cdots u(k+j)]^\top,\ \forall i_j\in T_j,\,\forall j,
 \end{equation}
 \normalsize
 
@@ -146,18 +146,18 @@ Once these models are created, at each instant $k$ we can find coefficients $\be
 \small
 \begin{equation*}
 \begin{aligned}
-& \underset{u_k}{\text{minimize}} & &  \sum_{j=1}^{N} y_{k+j}^2 Q + u^\top_{k+j-1} R u_{k+j-1} +  \lambda\varepsilon_j  \\
-& \text{subject to }            & &  y_{k+j}        =   \beta_{i_j} [1\ u_{k} \cdots u_{k+j-1} ]^\top                   \\
-&                               & &  u_{k+j-1}     \in  \mathcal{U}                                                     \\
+& \underset{u_k}{\text{minimize}} & &  \sum_{j=0}^{N} y_{k+j}^2 Q + u^\top_{k+j} R u_{k+j} +  \lambda\varepsilon_j  \\
+& \text{subject to }            & &  y_{k+j}        =   \beta_{i_j} [1\ u_{k} \cdots u_{k+j} ]^\top                   \\
+&                               & &  u_{k+j}     \in  \mathcal{U}                                                     \\
 &                               & &  |y_{k+j}|     \leq \bar{y} + \varepsilon_j 										\\
 &                               & &  \varepsilon_j \geq  0																\\
-&                               & &  j              =    1,\ldots,N,            									    \\
+&                               & &  j              =    0,\ldots,N,            									    \\
 \end{aligned}
 \end{equation*}
 \normalsize
 \end{problem}
 
-where slack variables $\varepsilon_j$ ensure recursive feasibility of the algorithm. This problem is solved as in classical MPC. At each time step the optimal $u^*_k,\ldots,u^*_{k+N-1}$ are computed and only the first one is applied as control input, i.e. $u(k) = u^*_k$.
+where slack variables $\varepsilon_j$ ensure recursive feasibility of the algorithm. This problem is solved as in classical MPC. At each time step the optimal $u^*_k,\ldots,u^*_{k+N}$ are computed and only the first one is applied as control input, i.e. $u(k) = u^*_k$.
 \begin{figure}[t!]
 	\begin{center}
 		\includegraphics[width=15pc]{figures/dpc-sepvars.eps}
